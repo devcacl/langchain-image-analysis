@@ -1,7 +1,8 @@
+from detalles_imagen import DetallesImagen
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_cohere import ChatCohere
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import StrOutputParser,JsonOutputParser
 from langchain.globals import set_debug
 
 from my_models import GEMINI_FLASH
@@ -77,6 +78,10 @@ cadena_analisis = (
     | StrOutputParser()
 )
 
+parser_json = JsonOutputParser(
+    pydantic_object=DetallesImagen
+)
+
 
 # =========================
 # 5. ANALIZAR IMAGEN
@@ -92,9 +97,7 @@ print(respuesta_analisis)
 # 6. MODELO COHERE
 # =========================
 
-llm_cohere = ChatCohere(
-    cohere_api_key=COHERE_API_KEY
-)
+#llm_cohere = ChatCohere(cohere_api_key=COHERE_API_KEY)
 
 
 # =========================
@@ -112,10 +115,15 @@ template_respuesta = PromptTemplate(
     # RESULTADO DEL ANÁLISIS DE LA IMAGEN
 
     {respuesta_analisis_imagen}
-    """,
-    input_variables=["respuesta_analisis_imagen"]
-)
 
+    #FORMATO DE SALIDA
+    {formato_salida}
+    """,
+    input_variables=["respuesta_analisis_imagen"],
+    partial_variables={
+        "formato_salida":parser_json.get_format_instructions()
+        }
+)
 
 # =========================
 # 8. CADENA DE RESUMEN
@@ -123,8 +131,8 @@ template_respuesta = PromptTemplate(
 
 cadena_resumen = (
     template_respuesta
-    | llm_cohere
-    | StrOutputParser()
+    | llm
+    | parser_json
 )
 
 
