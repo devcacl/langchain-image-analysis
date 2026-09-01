@@ -12,7 +12,7 @@ def main():
         handle_parsing_errors=True,
     )
 
-    pregunta = "Realiza el análisis de la imagen ejemplo_grafico.jpg"
+    pregunta = "explicame que es la IA de forma breve"
     respuesta = ejecutor.invoke({"input": pregunta})
 
     print(respuesta["output"])
